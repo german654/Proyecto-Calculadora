@@ -1,6 +1,7 @@
 package com.smart.calculadora.views.header
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,10 +17,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smart.calculadora.R
+import com.smart.calculadora.viewmodels.ResultadosViewModel
 import com.smart.calculadora.views.body.inter
 
 @Composable
-fun TicTacToeHeader(modifier: Modifier = Modifier) {
+fun TicTacToeHeader(
+    modifier: Modifier = Modifier,
+    viewModel: ResultadosViewModel,
+    onThemeChange: () -> Unit
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -32,7 +38,10 @@ fun TicTacToeHeader(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             HeaderTitle(title = "Material 2")
-            HeaderIcons(screenNumber = 1) // Indica el número de la pantalla
+            HeaderIcons(
+                screenNumber = 1,
+                onThemeChange = onThemeChange
+            ) // Indica el número de la pantalla
         }
     }
 }
@@ -50,23 +59,37 @@ fun HeaderTitle(title: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun HeaderIcons(screenNumber: Int, modifier: Modifier = Modifier) {
+fun HeaderIcons(
+    screenNumber: Int,
+    onThemeChange: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        HeaderIcon(painterResourceId = R.drawable.header_vector) // Ícono sin número
-        HeaderIcon(painterResourceId = R.drawable.header_vector2, screenNumber = screenNumber) // Ícono con número
-        HeaderIcon(painterResourceId = R.drawable.header_vector3) // Ícono sin número
+        HeaderIcon(painterResourceId = R.drawable.header_vector, onClick = onThemeChange)
+        HeaderIcon(
+            painterResourceId = R.drawable.header_vector2,
+            screenNumber = screenNumber
+        ) // Ícono para el nuemro de pantalla
+        HeaderIcon(painterResourceId = R.drawable.header_vector3) // Ícono tes puntos
     }
 }
 
 @Composable
-fun HeaderIcon(painterResourceId: Int, screenNumber: Int? = null, modifier: Modifier = Modifier) {
+fun HeaderIcon(
+    painterResourceId: Int,
+    screenNumber: Int? = null,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .size(50.dp) // Tamaño del ícono
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+
     ) {
         Icon(
             painter = painterResource(id = painterResourceId),
@@ -89,10 +112,4 @@ fun HeaderIcon(painterResourceId: Int, screenNumber: Int? = null, modifier: Modi
     }
 }
 
-@Preview
-@Composable
-fun PreviewTicTacToeHeader() {
-    MaterialTheme {
-        TicTacToeHeader()
-    }
-}
+

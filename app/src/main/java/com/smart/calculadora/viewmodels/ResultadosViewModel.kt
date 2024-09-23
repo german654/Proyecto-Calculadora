@@ -48,7 +48,7 @@ class ResultadosViewModel(
         nombreJugador1: String,
         nombreJugador2: String,
         nombrePartida: String,
-        idPartida: Int
+        partidaId: Int
     ) = viewModelScope.launch {
         // Crear un nuevo registro en la base de datos
         val nuevaPartida = Resultados(
@@ -71,4 +71,7 @@ class ResultadosViewModel(
     fun anularPartida(id: Int) = viewModelScope.launch {
         dao.anularPartida(id)
     }
+
+    // Método para obtener el estado de una partida por su ID
+    fun obtenerEstadoPartida(partidaId: Int) = dao.obtenerEstadoPartida(partidaId)
 }

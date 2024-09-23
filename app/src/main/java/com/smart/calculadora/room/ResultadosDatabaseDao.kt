@@ -43,4 +43,8 @@ interface ResultadosDatabaseDao {
     // Actualizar el ganador y el puntaje una vez que uno de los jugadores gana
     @Query("UPDATE resultados SET ganador = :ganador, punto = :punto, estado = 'Finalizado' WHERE id_resultado = :id")
     suspend fun finalizarPartida(id: Int, ganador: String, punto: Int)
+
+    // Obtener el estado de una partida específica
+    @Query("SELECT estado FROM resultados WHERE id_resultado = :partidaId")
+    fun obtenerEstadoPartida(partidaId: Int): Flow<String>
 }

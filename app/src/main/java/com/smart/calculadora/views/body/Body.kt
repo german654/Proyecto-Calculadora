@@ -1,7 +1,5 @@
 package com.smart.calculadora.views.body
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,104 +8,175 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.relay.compose.ColumnScopeInstanceImpl.weight
 import com.smart.calculadora.R
+import com.smart.calculadora.models.Resultados
+import com.smart.calculadora.models.room.ResultadosDatabaseDao
 import com.smart.calculadora.viewmodels.ResultadosViewModel
 import com.smart.calculadora.views.juego.TicTacToeGameBoard
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun TicTacToeBody(modifier: Modifier = Modifier) {
-    // Inicializa el ResultadosViewModel
-    val viewModel: ResultadosViewModel = viewModel()
+fun TicTacToeBody(
+    modifier: Modifier = Modifier,
+    viewModel: ResultadosViewModel
+) {
+    // Variables de estado locales para los nombres de los jugadores
+    var player1Name by remember { mutableStateOf("") }
+    var player2Name by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        // Sección de Jugadores
-        PlayersSection {
-            // Título del juego
-            GameTitleContainer {
-                TicTacToeTitle()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White), // Fondo blanco
+        contentAlignment = Alignment.Center // Centramos todo el contenido
+    ) {
+        Column(
+            modifier = modifier
+                .padding(0.dp)
+                .fillMaxWidth(0.9f) // El ancho de la columna será el 90% de la pantalla
+                .wrapContentHeight()
+                .align(Alignment.Center), // Alineamos la columna al centro de la pantalla
+            horizontalAlignment = Alignment.CenterHorizontally // Centrar horizontalmente
+        ) {
+            // Sección de Jugadores
+            PlayersSection {
+                // Título del juego
+                GameTitleContainer {
+                    TicTacToeTitle()
+                }
+
+                // Sección para el Jugador 1
+                PlayerSection(
+                    playerLabel = "Jugador 1",
+                    playerName = player1Name,
+                    onNameChange = { player1Name = it }
+                )
+
+                // Sección para el Jugador 2
+                PlayerSection(
+                    playerLabel = "Jugador 2",
+                    playerName = player2Name,
+                    onNameChange = { player2Name = it }
+                )
+
+                // Botones de Iniciar y Anular con acciones
+                ControlButtons {
+                    ActionButton(
+                        text = "Iniciar Partida",
+                        viewModel = viewModel,
+                        nombreJugador1 = "Jugador 1",
+                        nombreJugador2 = "Jugador 2",
+                        partidaId = 1,
+                        esIniciarPartida = true
+                    )
+                    Spacer(modifier = Modifier.width(20.dp)) // Espacio entre los botones
+                    ActionButton(
+                        text = "Anular Partida",
+                        viewModel = viewModel,
+                        nombreJugador1 = "Jugador 1",
+                        nombreJugador2 = "Jugador 2",
+                        partidaId = 1,
+                        esIniciarPartida = false
+                    )
+                }
             }
 
-            // Jugador 1 y Jugador 2
-            PlayerSection(playerName = "Juan", playerLabel = "Nombre Jugador 1:")
-            PlayerSection(playerName = "Pedro", playerLabel = "Nombre Jugador 2:")
+            // Tablero del juego
+            GameBoard(viewModel = viewModel, partidaId = 1)
 
-            // Botones de Iniciar y Anular con acciones
-            ControlButtons {
-                ActionButton(
-                    text = "Iniciar Partida",
-                    viewModel = viewModel,
-                    nombreJugador1 = "Jugador 1",
-                    nombreJugador2 = "Jugador 2",
-                    idPartida = 1,
-                    esIniciarPartida = true
-                )
-                Spacer(modifier = Modifier.width(20.dp)) // Espacio entre los botones
-                ActionButton(
-                    text = "Anular Partida",
-                    viewModel = viewModel,
-                    nombreJugador1 = "Jugador 1",
-                    nombreJugador2 = "Jugador 2",
-                    idPartida = 1,
-                    esIniciarPartida = false
-                )
-            }
-        }
+            // Sección de Puntajes
+            ScoreSection {
+                // Estados del Juego
+                Scoreboard {
+                    // Turno del Jugador
+                    TurnBox("J1: Juan (x)")
+                    Spacer(modifier = Modifier.width(5.dp))
+                    // Ganador del Juego: J1 o J2 o empate
+                    WinnerBox("Empate")
+                }
+                // Tabla de puntajes
+                // Titulo de la tabla de puntajes
+                ScoreTable { ScoreTableTitle() }
 
-        // Tablero del juego
-        GameBoard(modifier = Modifier.padding(top = 0.dp))
-
-        // Sección de Puntajes
-        ScoreSection {
-            // Estados del Juego
-            Scoreboard {
-                // Turno del Jugador
-                TurnBox("J1: Juan (x)")
-                Spacer(modifier = Modifier.width(5.dp))
-                // Ganador del Juego: J1 o J2 o empate
-                WinnerBox("Empate")
-            }
-            // Tabla de puntajes
-            // Titulo de la tabla de puntajes
-            ScoreTable { ScoreTableTitle() }
-
-            // Tabla de puntajes del partido
-            // En qui deben de estar los resultados del partido
-            MatchScoreContainer {
-                MatchInfo(
-                    matchTitle = "Partido 1",
-                    matchResult = "Ganador: Empate",
-                    labelScore = "P:",
-                    labelStatus = "E:",
-                    score = 0,
-                    status = "T"
-                )
+                // Tabla de puntajes del partido
+                // En qui deben de estar los resultados del partido
+                MatchScoreContainer {
+                    MatchInfo(
+                        matchTitle = "Partido 1",
+                        matchResult = "Ganador: Empate",
+                        labelScore = "P:",
+                        labelStatus = "E:",
+                        score = 0,
+                        status = "T"
+                    )
+                }
             }
         }
     }
 }
 
 
-@Preview(widthDp = 430, heightDp = 1000)
+@Preview(showSystemUi = true) // Mostrar la barra de estado y de navegación del dispositivo automáticamente
 @Composable
 fun TicTacToeBodyPreview() {
+    // Crear un dao ficticio que no hace nada
+    val mockDao = object : ResultadosDatabaseDao {
+        override fun obtenerResultados() = flowOf(emptyList<Resultados>())
+
+        override fun obtenerResultado(id: Int) =
+            flowOf(Resultados(id, "Partida $id", "Jugador1", "Jugador2", "Empate", 0, "Jugando"))
+
+        override suspend fun actualizarResultado(resultado: Resultados) {}
+        override suspend fun borrarResultado(resultado: Resultados) {}
+        override suspend fun iniciarPartida(id: Int) {}
+
+        override suspend fun insertarPartida(resultados: Resultados) {}
+        override suspend fun finalizarPartida(id: Int, ganador: String, punto: Int) {}
+
+        override fun obtenerEstadoPartida(partidaId: Int): Flow<String> {
+            return flowOf("J") // Estado ficticio
+        }
+
+        override suspend fun anularPartida(id: Int) {}
+    }
+    // Crear el viewModel con el dao ficticio
+    val mockViewModel = ResultadosViewModel(dao = mockDao)
+
     MaterialTheme {
-        TicTacToeBody()
+        // Ajustar automáticamente el tamaño de la vista según el contenido
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // Usar todo el espacio disponible de manera automática
+                .padding(16.dp) // Margen para no tocar los bordes
+                .wrapContentSize() // Ajustar al tamaño necesario según los componentes internos
+        ) {
+            // Usamos el viewModel ficticio en la vista previa
+            TicTacToeBody(viewModel = mockViewModel)
+        }
     }
 }
+
 
 // Sección de jugadores
 @Composable
@@ -123,24 +192,25 @@ fun PlayersSection(content: @Composable () -> Unit) {
 
 // Sección de Jugadores
 @Composable
-fun PlayerSection(playerName: String, playerLabel: String) {
+fun PlayerSection(playerLabel: String, playerName: String, onNameChange: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(80.dp)
             .padding(0.dp), // Agregar padding
         horizontalAlignment = Alignment.CenterHorizontally // Centrar contenido horizontalmente
     ) {
         // Label del jugador
         PlayerLabel(playerLabel)
 
-        // Rectángulo con el nombre del jugador
-        PlayerInfo(name = playerName)
+        // Campo de texto para el nombre del jugador
+        PlayerInfo(name = playerName, onNameChange = onNameChange)
     }
 }
 
+
 @Composable
-fun PlayerInfo(name: String) {
+fun PlayerInfo(name: String, onNameChange: (String) -> Unit) {
     Box(
         modifier = Modifier
             .padding(4.dp)
@@ -151,15 +221,21 @@ fun PlayerInfo(name: String) {
             ) // Borde negro y esquinas redondeadas
             .width(300.dp) // Ancho ajustado
             .height(50.dp) // Altura ajustada
-            .padding(16.dp) // Padding interno
+            .padding(8.dp) // Padding interno
     ) {
-        Text(
-            text = name,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            fontFamily = inter,
-            lineHeight = 1.21.em,
-            textAlign = TextAlign.Center // Centrar el texto
+        // Campo de texto editable en lugar de texto estático
+        TextField(
+            value = name,
+            onValueChange = onNameChange,
+            placeholder = { Text(text = "Ingresa el nombre del jugador") },
+            modifier = Modifier.fillMaxSize(),
+            singleLine = true,
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = inter,
+                textAlign = TextAlign.Center
+            )
         )
     }
 }
@@ -194,7 +270,7 @@ fun TicTacToeTitle(modifier: Modifier = Modifier) {
         fontWeight = FontWeight.Bold, // Negrita
         fontFamily = inter,
         textAlign = TextAlign.Center, // Centramos el texto
-        modifier = modifier.fillMaxWidth() // Aseguramos que ocupe todo el ancho para centrar el texto
+        modifier = modifier.fillMaxWidth()
     )
 }
 
@@ -205,7 +281,7 @@ fun GameTitleContainer(content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp) // Ajustamos padding para más flexibilidad
-            .height(48.dp), // Un poco más alto para mejor visualización
+            .height(40.dp), // Un poco más alto para mejor visualización
         contentAlignment = Alignment.Center // Centramos el contenido dentro del contenedor
     ) {
         content()
@@ -218,7 +294,7 @@ fun ControlButtons(content: @Composable () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 50.dp, vertical = 10.dp),
+            .padding(horizontal = 40.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -232,27 +308,32 @@ fun ActionButton(
     viewModel: ResultadosViewModel,
     nombreJugador1: String,
     nombreJugador2: String,
-    idPartida: Int,
+    partidaId: Int,
     esIniciarPartida: Boolean // Indica si es el botón de "Iniciar" o "Anular"
 ) {
-    val nombrePartida = "Partida $idPartida" // Generar nombre de la partida según el partido
+    val nombrePartida = "Partida $partidaId" // Generar nombre de la partida según el partido
 
     Box(
         modifier = Modifier
             .background(Color(0xFF005CC9), shape = RoundedCornerShape(10.dp))
-            .padding(horizontal = 28.dp, vertical = 12.dp)
+            .padding(horizontal = 5.dp, vertical = 12.dp)
             .clip(RoundedCornerShape(10.dp))
             .clickable {
                 if (esIniciarPartida) {
-                    viewModel.iniciarPartida(nombreJugador1, nombreJugador2, nombrePartida, idPartida)
+                    viewModel.iniciarPartida(
+                        nombreJugador1,
+                        nombreJugador2,
+                        nombrePartida,
+                        partidaId
+                    )
                 } else {
-                    viewModel.anularPartida(idPartida)
+                    viewModel.anularPartida(partidaId)
                 }
             }
     ) {
         Text(
             text = text,
-            fontSize = 21.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = inter,
             color = Color.White,
@@ -263,15 +344,19 @@ fun ActionButton(
 }
 
 
-// Tablero del juego
 @Composable
-fun GameBoard(modifier: Modifier = Modifier) {
+fun GameBoard(modifier: Modifier = Modifier, viewModel: ResultadosViewModel, partidaId: Int) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(460.dp)
+            .height(360.dp),
+        contentAlignment = Alignment.Center // Centra todo el contenido dentro del Box
     ) {
-        TicTacToeGameBoard(modifier = Modifier.align(Alignment.Center))
+        TicTacToeGameBoard(
+            modifier = Modifier.fillMaxSize(), // Asegura que el tablero use todo el espacio disponible
+            viewModel = viewModel,
+            partidaId = partidaId
+        )
     }
 }
 
@@ -281,8 +366,8 @@ fun ScoreSection(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
             .padding(horizontal = 5.dp)
+            .height(100.dp)
     ) {
         content()
     }
@@ -294,7 +379,7 @@ fun Scoreboard(content: @Composable () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(80.dp)
             .padding(horizontal = 30.dp), // Reducido el padding horizontal
         horizontalArrangement = Arrangement.Center, // Centramos el contenido
         verticalAlignment = Alignment.CenterVertically // Alineamos verticalmente
@@ -513,3 +598,4 @@ fun MatchInfo(
         MatchRightInfo(labelScore, labelStatus, score, status)  // Puntaje y estado del juego
     }
 }
+

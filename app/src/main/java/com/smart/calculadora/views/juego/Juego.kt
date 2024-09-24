@@ -52,8 +52,8 @@ fun TicTacToeGameBoard(
         Column(
             modifier = Modifier
                 .background(Color.Transparent),
-            verticalArrangement = Arrangement.spacedBy(8.dp), // Reduce el espacio entre las filas del tablero
-            horizontalAlignment = Alignment.CenterHorizontally // Centra horizontalmente
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Filas del tablero
             for (row in 0..2) {
@@ -84,7 +84,7 @@ fun TicTacToeRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
         content = content
     )
 }
@@ -117,7 +117,7 @@ fun TicTacToeCell(
 }
 
 
-@Preview(showSystemUi = true)
+@Preview(widthDp = 430, heightDp = 1500)
 @Composable
 fun TicTacToeGameBoardPreview() {
     // Creación de un ViewModel ficticio para la previsualización

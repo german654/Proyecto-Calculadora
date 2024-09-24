@@ -35,6 +35,8 @@ import com.smart.calculadora.viewmodels.ResultadosViewModel
 import com.smart.calculadora.views.juego.TicTacToeGameBoard
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import androidx.compose.material3.*
+
 
 @Composable
 fun TicTacToeBody(
@@ -45,135 +47,124 @@ fun TicTacToeBody(
     var player1Name by remember { mutableStateOf("") }
     var player2Name by remember { mutableStateOf("") }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White), // Fondo blanco
-        contentAlignment = Alignment.Center // Centramos todo el contenido
+    Column(
+        modifier = modifier
+            .padding(0.dp)
+            .fillMaxWidth(0.9f)
+            .wrapContentHeight()
     ) {
-        Column(
-            modifier = modifier
-                .padding(0.dp)
-                .fillMaxWidth(0.9f) // El ancho de la columna será el 90% de la pantalla
-                .wrapContentHeight()
-                .align(Alignment.Center), // Alineamos la columna al centro de la pantalla
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar horizontalmente
-        ) {
-            // Sección de Jugadores
-            PlayersSection {
-                // Título del juego
-                GameTitleContainer {
-                    TicTacToeTitle()
-                }
-
-                // Sección para el Jugador 1
-                PlayerSection(
-                    playerLabel = "Jugador 1",
-                    playerName = player1Name,
-                    onNameChange = { player1Name = it }
-                )
-
-                // Sección para el Jugador 2
-                PlayerSection(
-                    playerLabel = "Jugador 2",
-                    playerName = player2Name,
-                    onNameChange = { player2Name = it }
-                )
-
-                // Botones de Iniciar y Anular con acciones
-                ControlButtons {
-                    ActionButton(
-                        text = "Iniciar Partida",
-                        viewModel = viewModel,
-                        nombreJugador1 = "Jugador 1",
-                        nombreJugador2 = "Jugador 2",
-                        partidaId = 1,
-                        esIniciarPartida = true
-                    )
-                    Spacer(modifier = Modifier.width(20.dp)) // Espacio entre los botones
-                    ActionButton(
-                        text = "Anular Partida",
-                        viewModel = viewModel,
-                        nombreJugador1 = "Jugador 1",
-                        nombreJugador2 = "Jugador 2",
-                        partidaId = 1,
-                        esIniciarPartida = false
-                    )
-                }
+        // Sección de Jugadores
+        PlayersSection {
+            // Título del juego
+            GameTitleContainer {
+                TicTacToeTitle()
             }
 
-            // Tablero del juego
-            GameBoard(viewModel = viewModel, partidaId = 1)
+            // Sección para el Jugador 1
+            PlayerSection(
+                playerLabel = "Jugador 1",
+                playerName = player1Name,
+                onNameChange = { player1Name = it }
+            )
 
-            // Sección de Puntajes
-            ScoreSection {
-                // Estados del Juego
-                Scoreboard {
-                    // Turno del Jugador
-                    TurnBox("J1: Juan (x)")
-                    Spacer(modifier = Modifier.width(5.dp))
-                    // Ganador del Juego: J1 o J2 o empate
-                    WinnerBox("Empate")
-                }
-                // Tabla de puntajes
-                // Titulo de la tabla de puntajes
-                ScoreTable { ScoreTableTitle() }
+            // Sección para el Jugador 2
+            PlayerSection(
+                playerLabel = "Jugador 2",
+                playerName = player2Name,
+                onNameChange = { player2Name = it }
+            )
 
-                // Tabla de puntajes del partido
-                // En qui deben de estar los resultados del partido
-                MatchScoreContainer {
-                    MatchInfo(
-                        matchTitle = "Partido 1",
-                        matchResult = "Ganador: Empate",
-                        labelScore = "P:",
-                        labelStatus = "E:",
-                        score = 0,
-                        status = "T"
-                    )
-                }
+            // Botones de Iniciar y Anular con acciones
+            ControlButtons {
+                ActionButton(
+                    text = "Iniciar Partida",
+                    viewModel = viewModel,
+                    nombreJugador1 = "Jugador 1",
+                    nombreJugador2 = "Jugador 2",
+                    partidaId = 1,
+                    esIniciarPartida = true
+                )
+                Spacer(modifier = Modifier.width(20.dp)) // Espacio entre los botones
+                ActionButton(
+                    text = "Anular Partida",
+                    viewModel = viewModel,
+                    nombreJugador1 = "Jugador 1",
+                    nombreJugador2 = "Jugador 2",
+                    partidaId = 1,
+                    esIniciarPartida = false
+                )
+            }
+        }
+
+        // Tablero del juego
+        GameBoard(viewModel = viewModel, partidaId = 1)
+
+        // Sección de Puntajes
+        ScoreSection {
+            // Estados del Juego
+            Scoreboard {
+                // Turno del Jugador
+                TurnBox("J1: Juan (x)")
+                Spacer(modifier = Modifier.width(5.dp))
+                // Ganador del Juego: J1 o J2 o empate
+                WinnerBox("Empate")
+            }
+            // Tabla de puntajes
+            // Titulo de la tabla de puntajes
+            ScoreTable { ScoreTableTitle() }
+
+            // Tabla de puntajes del partido
+            // En qui deben de estar los resultados del partido
+            MatchScoreContainer {
+                MatchInfo(
+                    matchTitle = "Partido 1",
+                    matchResult = "Ganador: Empate",
+                    labelScore = "P:",
+                    labelStatus = "E:",
+                    score = 0,
+                    status = "T"
+                )
             }
         }
     }
 }
 
 
-@Preview(showSystemUi = true) // Mostrar la barra de estado y de navegación del dispositivo automáticamente
+@Preview(widthDp = 430, heightDp = 1500)
 @Composable
 fun TicTacToeBodyPreview() {
     // Crear un dao ficticio que no hace nada
     val mockDao = object : ResultadosDatabaseDao {
         override fun obtenerResultados() = flowOf(emptyList<Resultados>())
 
+        // Implementación ficticia del método obtenerResultado
         override fun obtenerResultado(id: Int) =
             flowOf(Resultados(id, "Partida $id", "Jugador1", "Jugador2", "Empate", 0, "Jugando"))
 
         override suspend fun actualizarResultado(resultado: Resultados) {}
         override suspend fun borrarResultado(resultado: Resultados) {}
-        override suspend fun iniciarPartida(id: Int) {}
+        override suspend fun iniciarPartida(id: Int) {
+            // Implementación ficticia vacía
+        }
 
         override suspend fun insertarPartida(resultados: Resultados) {}
         override suspend fun finalizarPartida(id: Int, ganador: String, punto: Int) {}
 
+        // Implementación correcta de obtenerEstadoPartida
         override fun obtenerEstadoPartida(partidaId: Int): Flow<String> {
-            return flowOf("J") // Estado ficticio
+            // Retornamos un Flow con el estado "Jugando"
+            return flowOf("J")
         }
 
         override suspend fun anularPartida(id: Int) {}
     }
+
     // Crear el viewModel con el dao ficticio
     val mockViewModel = ResultadosViewModel(dao = mockDao)
 
     MaterialTheme {
-        // Ajustar automáticamente el tamaño de la vista según el contenido
-        Box(
-            modifier = Modifier
-                .fillMaxSize() // Usar todo el espacio disponible de manera automática
-                .padding(16.dp) // Margen para no tocar los bordes
-                .wrapContentSize() // Ajustar al tamaño necesario según los componentes internos
-        ) {
-            // Usamos el viewModel ficticio en la vista previa
-            TicTacToeBody(viewModel = mockViewModel)
-        }
+        // Usamos el viewModel ficticio en la vista previa
+        TicTacToeBody(viewModel = mockViewModel)
     }
 }
 
@@ -208,57 +199,37 @@ fun PlayerSection(playerLabel: String, playerName: String, onNameChange: (String
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerInfo(name: String, onNameChange: (String) -> Unit) {
-    Box(
+    TextField(
+        value = name,
+        onValueChange = onNameChange,
+        placeholder = { Text(text = "Ingresa el nombre del jugador") },
         modifier = Modifier
-            .padding(4.dp)
-            .border(
-                1.dp,
-                Color.Black,
-                RoundedCornerShape(8.dp)
-            ) // Borde negro y esquinas redondeadas
-            .width(300.dp) // Ancho ajustado
-            .height(50.dp) // Altura ajustada
-            .padding(8.dp) // Padding interno
-    ) {
-        // Campo de texto editable en lugar de texto estático
-        TextField(
-            value = name,
-            onValueChange = onNameChange,
-            placeholder = { Text(text = "Ingresa el nombre del jugador") },
-            modifier = Modifier.fillMaxSize(),
-            singleLine = true,
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                fontFamily = inter,
-                textAlign = TextAlign.Center
-            )
+            .fillMaxWidth(0.6f) // Ajustar al 90% del ancho para no ocupar toda la pantalla
+            .padding(vertical = 8.dp) // Espacio vertical entre el label y el campo
+            .height(56.dp), // Altura del TextField estándar
+        singleLine = true,
+        shape = RoundedCornerShape(8.dp), // Esquinas redondeadas
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
         )
-    }
+    )
 }
+
 
 @Composable
 fun PlayerLabel(label: String) {
-    Box(
-        modifier = Modifier
-            .padding(bottom = 4.dp)
-            .background(Color.Transparent) // Sin borde, pero se mantiene el área de fondo
-            .width(300.dp) // Alinear con el rectángulo del nombre
-            .height(30.dp) // Altura ajustada
-            .padding(vertical = 8.dp, horizontal = 16.dp) // Padding interno
-    ) {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontFamily = laila,
-            fontWeight = FontWeight.Light,
-            lineHeight = 1.55.em,
-            textAlign = TextAlign.Center // Centrar el texto
-        )
-    }
+    Text(
+        text = label,
+        fontSize = 14.sp, // Tamaño de texto ajustado
+        fontWeight = FontWeight.Bold, // Más peso para el texto
+        modifier = Modifier.padding(vertical = 4.dp), // Espaciado ajustado
+        textAlign = TextAlign.Center // Centrar el texto
+    )
 }
 
 // Título del juego
@@ -366,8 +337,8 @@ fun ScoreSection(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .height(200.dp)
             .padding(horizontal = 5.dp)
-            .height(100.dp)
     ) {
         content()
     }
@@ -539,7 +510,7 @@ fun MatchRightInfo(labelScore: String, labelStatus: String, score: Int, status: 
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .background(Color(0xFFE0E0E0))
-                    .padding(3.dp) // Espaciado interno ajustado para dar mejor presentación
+                    .padding(3.dp)
             ) {
                 CircleLabel(labelScore)
                 Spacer(modifier = Modifier.width(4.dp))
